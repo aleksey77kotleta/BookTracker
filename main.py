@@ -45,3 +45,76 @@ class BookTrackerApp:
 
         # Отображаем данные при запуске
         self.update_listbox()
+
+        # Логика
+
+        def add_book(self):
+            title = self.title_entry.get().strip()
+            author = self.author_entry.get().strip()
+            pages = self.pages_entry.get().strip()
+
+            # Валидация
+            if not title or not author or not pages:
+                messagebox.showerror("Ошибка", "Все поля должны быть заполнены!")
+                return
+
+            if not pages.isdigit():
+                messagebox.showerror("Ошибка", "В поле 'Страницы' должны быть только цифры!")
+                return
+
+            # Добавление в список
+            new_book = {
+                "title": title,
+                "author": author,
+                "pages": pages
+            }
+            self.books.append(new_book)
+
+            self.save_data()
+            self.update_listbox()
+            self.clear_entries()
+            messagebox.showinfo("Успех", f"Книга '{title}' добавлена!")
+
+        def filter_books(self):
+            query = self.search_entry.get().lower().strip()
+            self.books_listbox.delete(0, tk.END)
+
+            for book in self.books:
+                if query in book['title'].lower() or query in book['author'].lower():
+                    display_text = f"{book['title']} — {book['author']} ({book['pages']} стр.)"
+                    self.books_listbox.insert(tk.END, display_text)
+
+        def delete_book(self):
+            try:
+                # Получаем индекс выбранной строки в Listbox
+                selected_index = self.books_listbox.curselection()[0]
+                # Чтобы правильно удалить из основного списка при включенном фильтре,
+                # находим книгу по тексту строки
+                selected_text = self.books_listbox.get(selected_index)
+
+                # Удаляем из основного списка self.books
+                self.books = [b for b in self.books if
+                              f"{b['title']} — {b['author']} ({b['pages']} стр.)" != selected_text]
+
+                self.save_data()
+                self.update_listbox()
+            except IndexError:
+                messagebox.showwarning("Внимание", "Сначала выберите книгу для удаления!")
+
+        def get_random_book(self):
+            if not self.books:
+                messagebox.showwarning("Пусто", "Список книг пуст!")
+                return
+            book = random.choice(self.books)
+            messagebox.showinfo("Рекомендация", f"Почитайте сегодня:\n\n{book['title']}\nАвтор: {book['author']}")
+
+        def update_listbox(self):
+            """Просто обновляет список, сбрасывая фильтр"""
+            self.books_listbox.delete(0, tk.END)
+            for book in self.books:
+                self.books_listbox.insert(tk.END, f"{book['title']} — {book['author']} ({book['pages']} стр.)")
+
+        def clear_entries(self):
+            self.title_entry.delete(0, tk.END)
+            self.author_entry.delete(0, tk.END)
+            self.pages_entry.delete(0, tk.END)
