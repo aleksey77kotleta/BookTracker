@@ -118,3 +118,12 @@ class BookTrackerApp:
             self.title_entry.delete(0, tk.END)
             self.author_entry.delete(0, tk.END)
             self.pages_entry.delete(0, tk.END)
+
+            # Работа с JSON
+
+        def save_data(self):
+            try:
+                with open(self.file_path, "w", encoding="utf-8") as f:
+                    json.dump(self.books, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                messagebox.showerror("Ошибка сохранения",
